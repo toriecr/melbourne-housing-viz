@@ -11,7 +11,26 @@ function App() {
 			<main style={{ flex: 1, }}>
 				<HousingChart />
 			</main>
-			<footer style={{ paddingBottom: '1%', fontSize: '14px' }}>
+			<footer style={{ paddingBottom: '1%', fontSize: '13px' }}>
+				<p style={{ fontStyle: 'italic', padding: '1%' }}>
+					Data sources:{' '}
+					<a
+						href="https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/residential-property-price-indexes-eight-capital-cities"
+						target="_blank"
+						rel="noreferrer"
+					>
+						ABS Residential Property Price Indexes: Eight Capital Cities (cat. 6416.0)
+					</a>{' '}
+					for median established house prices, and{' '}
+					<a
+						href="https://www.abs.gov.au/statistics/labour/earnings-and-working-conditions/average-weekly-earnings-australia/latest-release"
+						target="_blank"
+						rel="noreferrer"
+					>
+						ABS Average Weekly Earnings, Australia (cat. 6302.0)
+					</a>{' '}
+					for Victorian full-time adult earnings.
+				</p>
 				<p>Built with React and D3.js - Torie CR</p>
 			</footer>
 		</>
