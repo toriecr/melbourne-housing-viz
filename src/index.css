@@ -113,3 +113,12 @@ code {
 	padding: 4px 8px;
 	background: var(--code-bg);
 }
+
+.chart-interactive-area:focus {
+	outline: none;
+}
+
+.chart-interactive-area:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}

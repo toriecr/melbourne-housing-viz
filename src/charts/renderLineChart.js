@@ -125,12 +125,41 @@ export default function renderLineChart(
 
 	const hoverOverlay = plotGroup
 		.append('rect')
+		.attr('class', 'chart-interactive-area')
 		.attr('width', plotWidth)
 		.attr('height', plotHeight)
 		.attr('fill', 'transparent')
 		.attr('pointer-events', 'all')
+		.attr('tabindex', 0)
+		.attr('role', 'img')
+		.attr(
+			'aria-label',
+			'Housing affordability line chart. Use left and right arrow keys to move between data points.'
+		)
 
 	const dateBisector = d3.bisector((d) => d.date).left
+	let activeIndex = data.length ? data.length - 1 : 0
+
+	function showPointAtIndex(index) {
+		if (!data.length) return
+
+		activeIndex = Math.max(0, Math.min(data.length - 1, index))
+		const point = data[activeIndex]
+
+		focusGroup.attr('display', null)
+		focusGroup
+			.select('line')
+			.attr('x1', xScale(point.date))
+			.attr('x2', xScale(point.date))
+		focusGroup
+			.select('circle')
+			.attr('cx', xScale(point.date))
+			.attr('cy', yScale(yAccessor(point)))
+
+		if (onFocus) {
+			onFocus(point)
+		}
+	}
 
 	function showHoveredPoint(event) {
 		const [mouseX] = d3.pointer(event, hoverOverlay.node())
@@ -145,29 +174,32 @@ export default function renderLineChart(
 				? laterPoint
 				: earlierPoint
 
-		focusGroup.attr('display', null)
-		focusGroup
-			.select('line')
-			.attr('x1', xScale(nearestPoint.date))
-			.attr('x2', xScale(nearestPoint.date))
-		focusGroup
-			.select('circle')
-			.attr('cx', xScale(nearestPoint.date))
-			.attr('cy', yScale(yAccessor(nearestPoint)))
+		showPointAtIndex(data.indexOf(nearestPoint))
+	}
 
-		if (onFocus) {
-			onFocus(nearestPoint)
+	function hideFocus() {
+		focusGroup.attr('display', 'none')
+		activeIndex = data.length ? data.length - 1 : 0
+		if (onFocus && data.length) {
+			onFocus(data[data.length - 1])
+		}
+	}
+
+	function handleKeydown(event) {
+		if (event.key === 'ArrowLeft') {
+			event.preventDefault()
+			showPointAtIndex(activeIndex - 1)
+		} else if (event.key === 'ArrowRight') {
+			event.preventDefault()
+			showPointAtIndex(activeIndex + 1)
 		}
 	}
 
 	hoverOverlay
-		.on('mousemove focusin', showHoveredPoint)
-		.on('mouseleave focusout', () => {
-			focusGroup.attr('display', 'none')
-			if (onFocus && data.length) {
-				onFocus(data[data.length - 1])
-			}
-		})
+		.on('mousemove', showHoveredPoint)
+		.on('focusin', () => showPointAtIndex(activeIndex))
+		.on('keydown', handleKeydown)
+		.on('mouseleave focusout', hideFocus)
 
 	if (onFocus && data.length) {
 		onFocus(data[data.length - 1])
