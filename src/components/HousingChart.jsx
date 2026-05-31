@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import * as d3 from 'd3'
-import { DATA_CONFIG, FORMAT } from '../chartConfig'
+import { FORMAT, METRICS } from '../chartConfig'
+import { loadChartData } from '../data/loadChartData'
 import renderLineChart from '../charts/renderLineChart'
 
 export default function HousingChart() {
@@ -13,37 +14,26 @@ export default function HousingChart() {
 
 		let isCancelled = false
 
-		const parsePeriodToDate = d3.timeParse(DATA_CONFIG.periodParseFormat)
-		const quarterFormatter = d3.timeFormat(FORMAT.quarter)
-		const priceFormatter = d3.format(FORMAT.price)
-
-		const handleDataPointFocus = (dataPoint) => {
-			setSummary(
-				`In ${quarterFormatter(dataPoint.date)}, the median established house in Melbourne was ${priceFormatter(dataPoint.median_price_aud)}.`
-			)
+		const metric = METRICS.yearsOfEarnings
+		const fmt = {
+			quarter: d3.timeFormat(FORMAT.quarter),
+			value: d3.format(metric.valueFormat),
 		}
 
-		const renderChartFromCsvRows = (csvRows) => {
-			const chartData = csvRows
-				.map((row) => ({
-					date: parsePeriodToDate(row.period),
-					median_price_aud: +row.median_price_aud * DATA_CONFIG.priceThousandsMultiplier,
-				}))
-				.filter((row) => row.date && !Number.isNaN(row.median_price_aud))
-				.sort((a, b) => a.date - b.date)
-
-			if (!chartData.length) return
-			renderLineChart(chartContainer, chartData, { onFocus: handleDataPointFocus })
+		const draw = (chartData) => {
+			if (isCancelled || !chartData.length) return
+			renderLineChart(chartContainer, chartData, {
+				yAccessor: (d) => d[metric.key],
+				yAxisLabel: metric.yAxisLabel,
+				valueFormat: metric.valueFormat,
+				onFocus: (point) => setSummary(metric.summary(point, fmt)),
+			})
 		}
 
-		d3.csv(DATA_CONFIG.csvPath).then((csvRows) => {
-			if (!isCancelled) renderChartFromCsvRows(csvRows)
-		})
+		loadChartData().then(draw)
 
 		const handleWindowResize = () => {
-			d3.csv(DATA_CONFIG.csvPath).then((csvRows) => {
-				if (!isCancelled) renderChartFromCsvRows(csvRows)
-			})
+			loadChartData().then(draw)
 		}
 
 		window.addEventListener('resize', handleWindowResize)

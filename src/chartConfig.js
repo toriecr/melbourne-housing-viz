@@ -1,7 +1,20 @@
 export const DATA_CONFIG = {
-	csvPath: '/data/melbourne-median-house.csv',
+	housingCsvPath: '/data/melbourne-median-house.csv',
+	earningsCsvPath: '/data/victoria-full-time-earnings.csv',  // NEW
 	periodParseFormat: '%b-%Y',
 	priceThousandsMultiplier: 1000, // ABS Table 2 publishes median prices in $'000
+	weeksPerYear: 52,
+}
+
+export const METRICS = {
+	yearsOfEarnings: {
+		key: 'years_of_earnings',
+		yAxisLabel: 'Years of full-time earnings',
+		valueFormat: '.1f',
+		summary: (point, fmt) =>
+			`In ${fmt.quarter(point.date)}, a median Melbourne house cost ` +
+			`${fmt.value(point.years_of_earnings)} years of full-time pay.`,
+	},
 }
 
 export const FORMAT = {

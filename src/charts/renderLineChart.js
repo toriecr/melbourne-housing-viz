@@ -2,7 +2,11 @@ import * as d3 from 'd3'
 import { FORMAT, CHART_LAYOUT, CHART_SCALES, CHART_STYLE } from '../chartConfig'
 
 
-export default function renderLineChart(container, data, { onFocus } = {}) {
+export default function renderLineChart(
+	container,
+	data,
+	{ yAccessor, yAxisLabel, valueFormat, onFocus } = {}
+) {
 	const { margin, maxWidth, height } = CHART_LAYOUT
 	const chartWidth = Math.min(maxWidth, container.clientWidth || maxWidth)
 	const plotWidth = chartWidth - margin.left - margin.right
@@ -30,7 +34,7 @@ export default function renderLineChart(container, data, { onFocus } = {}) {
 		.scaleLinear()
 		.domain([
 			0,
-			d3.max(data, (d) => d.median_price_aud) * CHART_SCALES.yDomainHeadroomRatio,
+			d3.max(data, yAccessor) * CHART_SCALES.yDomainHeadroomRatio,
 		])
 		.nice()
 		.range([plotHeight, 0])
@@ -38,9 +42,9 @@ export default function renderLineChart(container, data, { onFocus } = {}) {
 	const lineGenerator = d3
 		.line()
 		.x((d) => xScale(d.date))
-		.y((d) => yScale(d.median_price_aud))
+		.y((d) => yScale(yAccessor(d)))
 
-	const priceFormatter = d3.format(FORMAT.price)
+	const valueFormatter = d3.format(valueFormat)
 	const xAxisTickInterval = d3.timeYear.every(CHART_SCALES.xTickYearsInterval)
 
 	plotGroup
@@ -72,7 +76,7 @@ export default function renderLineChart(container, data, { onFocus } = {}) {
 	plotGroup
 		.append('g')
 		.attr('class', 'axis')
-		.call(d3.axisLeft(yScale).ticks(CHART_SCALES.yTickCount).tickFormat(priceFormatter))
+		.call(d3.axisLeft(yScale).ticks(CHART_SCALES.yTickCount).tickFormat(valueFormatter))
 
 	plotGroup
 		.append('text')
@@ -91,7 +95,7 @@ export default function renderLineChart(container, data, { onFocus } = {}) {
 		.attr('text-anchor', 'middle')
 		.attr('fill', 'currentColor')
 		.attr('font-size', CHART_STYLE.axisLabelFontSize)
-		.text('Median price (AUD)')
+		.text(yAxisLabel)
 
 	plotGroup
 		.append('path')
@@ -149,7 +153,7 @@ export default function renderLineChart(container, data, { onFocus } = {}) {
 		focusGroup
 			.select('circle')
 			.attr('cx', xScale(nearestPoint.date))
-			.attr('cy', yScale(nearestPoint.median_price_aud))
+			.attr('cy', yScale(yAccessor(nearestPoint)))
 
 		if (onFocus) {
 			onFocus(nearestPoint)
