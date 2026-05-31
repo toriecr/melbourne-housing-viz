@@ -5,7 +5,7 @@ import { FORMAT, CHART_LAYOUT, CHART_SCALES, CHART_STYLE } from '../chartConfig'
 export default function renderLineChart(
 	container,
 	data,
-	{ yAccessor, yAxisLabel, valueFormat, onFocus } = {}
+	{ yAccessor, yAxisLabel, axisFormat, onFocus } = {}
 ) {
 	const { margin, maxWidth, height } = CHART_LAYOUT
 	const chartWidth = Math.min(maxWidth, container.clientWidth || maxWidth)
@@ -44,7 +44,7 @@ export default function renderLineChart(
 		.x((d) => xScale(d.date))
 		.y((d) => yScale(yAccessor(d)))
 
-	const valueFormatter = d3.format(valueFormat)
+	const axisTickFormatter = d3.format(axisFormat)
 	const xAxisTickInterval = d3.timeYear.every(CHART_SCALES.xTickYearsInterval)
 
 	plotGroup
@@ -76,7 +76,7 @@ export default function renderLineChart(
 	plotGroup
 		.append('g')
 		.attr('class', 'axis')
-		.call(d3.axisLeft(yScale).ticks(CHART_SCALES.yTickCount).tickFormat(valueFormatter))
+		.call(d3.axisLeft(yScale).ticks(CHART_SCALES.yTickCount).tickFormat(axisTickFormatter))
 
 	plotGroup
 		.append('text')
