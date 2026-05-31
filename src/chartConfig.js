@@ -1,6 +1,6 @@
 export const DATA_CONFIG = {
-	housingCsvPath: '/data/melbourne-median-house.csv',
-	earningsCsvPath: '/data/victoria-full-time-earnings.csv',  // NEW - unchanged from source, note this is weekly earnings
+	housingCsvPath: `${import.meta.env.BASE_URL}data/melbourne-median-house.csv`,
+	earningsCsvPath: `${import.meta.env.BASE_URL}data/victoria-full-time-earnings.csv`,
 	periodParseFormat: '%b-%Y',
 	priceThousandsMultiplier: 1000, // ABS Table 2 publishes median prices in $'000
 	weeksPerYear: 52,
